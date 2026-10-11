@@ -20,7 +20,7 @@ npm start
 
 L'app è su **http://localhost:3000**. La porta non è casuale: è già autorizzata sia nel CORS del gateway (`CORS_ALLOWED_ORIGINS`) sia nei redirect URI del client Keycloak `ecommerce-web`. Se la cambi, aggiorna entrambi.
 
-Gli indirizzi di gateway e Keycloak sono in [`src/environments/environment.ts`](src/environments/environment.ts).
+Gli indirizzi predefiniti di gateway e Keycloak sono in [`src/environments/environment.ts`](src/environments/environment.ts) e si possono sovrascrivere senza ricompilare tramite [`public/env.js`](public/env.js), caricato prima di Angular.
 
 ## Autenticazione
 
@@ -70,7 +70,40 @@ src/app/
 
 Tutte le pagine sono caricate in lazy loading. Lo stile è un unico foglio globale ([`src/styles.scss`](src/styles.scss)) con token CSS e tema scuro automatico.
 
-## Build di produzione
+## Immagine Docker
+
+Il [`Dockerfile`](Dockerfile) compila l'app con Node 22 e la serve con **nginx senza privilegi di root** sulla porta 8080 del container. La configurazione di nginx ([`docker/nginx.conf`](docker/nginx.conf)) rimanda le rotte di Angular a `index.html`, tiene in cache a lungo i file con hash e mai `index.html` e `env.js`.
+
+A ogni avvio, [`docker/40-generate-env-js.sh`](docker/40-generate-env-js.sh) rigenera `env.js` dalle variabili d'ambiente, così la stessa immagine funziona con porte diverse:
+
+| Variabile | Predefinito | Significato |
+|---|---|---|
+| `API_URL` | `http://localhost:8080/api/v1` | gateway, come lo raggiunge il **browser** |
+| `KEYCLOAK_URL` | `http://localhost:9000` | Keycloak, come lo raggiunge il **browser** |
+
+Sono indirizzi pubblici e non i nomi interni della rete Docker, perché le chiamate partono dal browser dell'utente, non dal container.
+
+### Insieme al back-end (consigliato)
+
+Il `docker-compose.yml` del progetto `e-commerce` ha il servizio `frontend`, nel profilo `apps`, che costruisce questa cartella (`../e-commerce-FE`) e imposta le variabili a partire dal `.env`. Dalla cartella `e-commerce`:
+
+```bash
+docker compose --profile apps up -d --build
+```
+
+### Da solo
+
+```bash
+docker build -t ecommerce-web .
+```
+
+```bash
+docker run --rm -p 127.0.0.1:3000:8080 ecommerce-web
+```
+
+La porta pubblicata deve essere 3000 o 5173, le sole ammesse da CORS e Keycloak.
+
+## Build di produzione senza Docker
 
 ```bash
 npm run build

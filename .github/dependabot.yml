@@ -1,0 +1,16 @@
+# Aggiornamenti automatici delle dipendenze: Dependabot apre una pull request per ogni versione nuova
+# e segnala subito quelle con vulnerabilità note (CVE).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    groups:
+      angular:
+        patterns: ["@angular/*", "@angular-devkit/*"]
+
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly
