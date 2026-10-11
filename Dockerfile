@@ -7,7 +7,7 @@ COPY . .
 RUN npm run build
 
 # nginx senza privilegi di root, in ascolto sulla porta 8080 del container.
-FROM nginxinc/nginx-unprivileged:1.30.5-alpine
+FROM nginxinc/nginx-unprivileged:1.31.6-alpine
 # Cartella scrivibile dall'utente nginx: ci finiscono gli header di sicurezza generati all'avvio.
 USER root
 RUN install -d -o 101 -g 101 /etc/nginx/security
