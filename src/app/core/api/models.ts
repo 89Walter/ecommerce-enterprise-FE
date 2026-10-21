@@ -35,6 +35,27 @@ export interface ProductRequest {
   price: number;
 }
 
+/** Proposta generata con Claude (POST /catalog/products/{id}/description-suggestion): non è ancora salvata. */
+export interface DescriptionSuggestion {
+  productId: number;
+  currentDescription: string;
+  suggestedDescription: string;
+}
+
+// ---------------------------------------------------------------- assistant-service
+
+export interface AssistantChatRequest {
+  message: string;
+  /** Assente alla prima domanda; poi quello ricevuto nella risposta precedente. */
+  conversationId?: string;
+}
+
+export interface AssistantChatResponse {
+  conversationId: string;
+  reply: string;
+  toolsUsed: string[];
+}
+
 // ---------------------------------------------------------------- order-service
 
 export type OrderStatus = 'PLACED' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';

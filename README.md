@@ -42,7 +42,9 @@ Se Keycloak non risponde all'avvio, il catalogo resta consultabile e l'header mo
 | Cliente | I miei ordini | `GET /orders` |
 | Cliente | Dettaglio ordine: timeline, pagamento, spedizione, annullamento | `GET /orders/{id}`, `GET /payments/orders/{id}`, `GET /shipments/orders/{id}`, `POST /orders/{id}/cancel` |
 | Cliente | Profilo e indirizzo predefinito | `GET` / `PUT /users/me` |
+| Cliente | Assistente AI: domande su ordini e consigli sui prodotti (i riferimenti `#id` diventano link) | `POST /assistant/chat`, `GET /assistant/status` |
 | ADMIN | Prodotti: crea, modifica, elimina | `POST` / `PUT` / `DELETE /catalog/products` |
+| ADMIN | Prodotti: descrizione proposta da AI, da approvare prima di salvarla | `POST /catalog/products/{id}/description-suggestion` |
 | ADMIN | Ordini con filtro per stato | `GET /orders/admin` |
 | ADMIN | Spedizioni: segna spedita / consegnata | `GET /shipments/admin`, `PATCH /shipments/admin/{id}/status` |
 | ADMIN | Pagamenti e clienti | `GET /payments/admin`, `GET /users/admin` |

@@ -37,6 +37,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/orders/order-detail').then((m) => m.OrderDetail),
   },
   {
+    path: 'assistant',
+    title: 'Assistente · Bottega',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/assistant/assistant-page').then((m) => m.AssistantPage),
+  },
+  {
     path: 'profile',
     title: 'Profilo · Bottega',
     canActivate: [authGuard],

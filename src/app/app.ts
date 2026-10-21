@@ -23,6 +23,7 @@ import { NotificationService } from './core/notifications/notification.service';
           <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Catalogo</a>
           @if (auth.authenticated()) {
             <a routerLink="/orders" routerLinkActive="is-active">I miei ordini</a>
+            <a routerLink="/assistant" routerLinkActive="is-active">Assistente</a>
           }
           @if (auth.isAdmin()) {
             <a routerLink="/admin" routerLinkActive="is-active">Back-office</a>

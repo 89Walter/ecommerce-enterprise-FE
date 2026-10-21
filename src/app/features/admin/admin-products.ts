@@ -45,6 +45,27 @@ import { Paginator } from '../../shared/paginator';
               <small class="field__error">Obbligatoria.</small>
             }
           </label>
+          @if (editingId() !== null) {
+            <div class="field field--full ai-suggestion">
+              <div>
+                <button type="button" class="btn btn--ghost btn--small" [disabled]="suggesting()" (click)="suggest()">
+                  {{ suggesting() ? 'Generazione in corso…' : '✨ Suggerisci descrizione con AI' }}
+                </button>
+              </div>
+              @if (suggestion(); as text) {
+                <div class="ai-suggestion__box">
+                  <p class="muted small">Proposta generata con AI: rileggila prima di salvarla.</p>
+                  <p class="ai-suggestion__text">{{ text }}</p>
+                  <div class="actions">
+                    <button type="button" class="btn btn--ghost btn--small" (click)="suggestion.set(null)">Scarta</button>
+                    <button type="button" class="btn btn--primary btn--small" (click)="useSuggestion(text)">
+                      Usa questa descrizione
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
         </div>
         <div class="actions">
           <button type="button" class="btn btn--ghost" (click)="editing.set(null)">Annulla</button>
@@ -95,6 +116,15 @@ import { Paginator } from '../../shared/paginator';
       <app-paginator [meta]="result.page" (pageChange)="load($event)" />
     }
   `,
+  styles: `
+    .ai-suggestion { display: flex; flex-direction: column; gap: 8px; }
+    .ai-suggestion__box {
+      border: 1px dashed var(--primary); border-radius: var(--radius-small);
+      padding: 10px 14px; background: var(--surface-muted);
+    }
+    .ai-suggestion__box p { margin: 0 0 8px; }
+    .ai-suggestion__text { white-space: pre-line; }
+  `,
 })
 export class AdminProducts {
   private readonly catalog = inject(CatalogApi);
@@ -105,6 +135,8 @@ export class AdminProducts {
   protected readonly error = signal<string | null>(null);
   protected readonly editing = signal<Product | 'new' | null>(null);
   protected readonly saving = signal(false);
+  protected readonly suggesting = signal(false);
+  protected readonly suggestion = signal<string | null>(null);
 
   protected readonly form = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(255)] }),
@@ -138,12 +170,39 @@ export class AdminProducts {
 
   protected startCreate(): void {
     this.form.reset();
+    this.suggestion.set(null);
     this.editing.set('new');
   }
 
   protected startEdit(product: Product): void {
     this.form.reset({ name: product.name, description: product.description, price: product.price });
+    this.suggestion.set(null);
     this.editing.set(product);
+  }
+
+  /** Chiede a Claude una descrizione per il prodotto salvato; finché non si preme "Salva" non cambia nulla. */
+  protected suggest(): void {
+    const id = this.editingId();
+    if (id === null) {
+      return;
+    }
+    this.suggesting.set(true);
+    this.catalog.suggestDescription(id).subscribe({
+      next: (result) => {
+        this.suggestion.set(result.suggestedDescription);
+        this.suggesting.set(false);
+      },
+      error: (error: unknown) => {
+        this.suggesting.set(false);
+        this.notifications.error(apiErrorMessage(error));
+      },
+    });
+  }
+
+  protected useSuggestion(text: string): void {
+    this.form.controls.description.setValue(text);
+    this.form.controls.description.markAsDirty();
+    this.suggestion.set(null);
   }
 
   protected save(): void {

@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { toParams } from './http-params';
-import { Page, PageQuery, Product, ProductRequest } from './models';
+import { DescriptionSuggestion, Page, PageQuery, Product, ProductRequest } from './models';
 
 @Injectable({ providedIn: 'root' })
 export class CatalogApi {
@@ -29,5 +29,10 @@ export class CatalogApi {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  /** ADMIN: chiede a Claude una nuova descrizione. Non salva nulla: per usarla serve update(). */
+  suggestDescription(id: number): Observable<DescriptionSuggestion> {
+    return this.http.post<DescriptionSuggestion>(`${this.baseUrl}/${id}/description-suggestion`, null);
   }
 }
